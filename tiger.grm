@@ -1,0 +1,127 @@
+%%
+%term
+    EOF 
+  | ID of string
+  | INT of int | STRING of string 
+  | COMMA | COLON | SEMICOLON | LPAREN | RPAREN | LBRACK | RBRACK 
+  | LBRACE | RBRACE | DOT 
+  | PLUS | MINUS | TIMES | DIVIDE | EQ | NEQ | LT | LE | GT | GE
+  | AND | OR | ASSIGN
+  | ARRAY | IF | THEN | ELSE | WHILE | FOR | TO | DO | LET | IN | END | OF 
+  | BREAK | NIL
+  | FUNCTION | VAR | TYPE | UMINUS
+
+%nonterm program | decs | dec | ty | tydec | tyfields | fieldsdec | vardec
+       | fundec | lvalue | lvalue' | exp | exps | expsemi | expcom | params
+       | recs | reccom | infixexp
+
+%pos int
+%verbose
+%start program
+%eop EOF
+%noshift EOF
+
+%name Tiger
+
+%keyword WHILE FOR TO BREAK LET IN END FUNCTION VAR TYPE ARRAY IF THEN ELSE 
+         DO OF NIL
+
+%prefer THEN ELSE LPAREN
+
+%right OF
+%nonassoc DO
+%nonassoc ELSE
+%nonassoc ASSIGN
+%left AND OR
+%nonassoc EQ NEQ GT GE LT LE
+%left PLUS MINUS
+%left TIMES DIVIDE
+%left UMINUS
+
+%value ID ("bogus")
+%value INT (1)
+%value STRING ("")
+
+%%
+
+program	: exp                            ()
+
+decs :                                   ()
+     | dec decs                          ()
+
+dec : tydec                              ()
+    | vardec                             ()
+    | fundec                             ()
+
+tydec : TYPE ID EQ ty                    ()
+
+ty : ID                                  ()
+   | LBRACE tyfields RBRACE              ()
+   | ARRAY OF ID                         ()
+
+tyfields :                               ()
+         | ID COLON ID fieldsdec         ()
+
+fieldsdec :                              ()
+          | COMMA ID COLON ID fieldsdec  ()
+
+vardec : VAR ID ASSIGN exp               ()
+       | VAR ID COLON ID ASSIGN exp      ()
+
+fundec : FUNCTION ID LPAREN tyfields RPAREN EQ exp           ()
+       | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp  ()
+
+lvalue : ID                              ()
+       | lvalue'                         ()
+
+lvalue' : ID DOT ID                      ()
+        | lvalue' DOT ID                 ()
+        | ID LBRACK exp RBRACK           ()
+        | lvalue' LBRACK exp RBRACK      ()
+
+exp : lvalue                             ()
+    | NIL                                ()
+    | LPAREN exps RPAREN                 ()
+    | INT                                ()
+    | STRING                             ()
+    | MINUS exp %prec UMINUS             ()
+    | ID LPAREN params RPAREN            ()
+    | exp PLUS exp                       ()
+    | exp MINUS exp                      ()
+    | exp TIMES exp                      ()
+    | exp DIVIDE exp                     ()
+    | exp EQ exp                         ()
+    | exp NEQ exp                        ()
+    | exp LT exp                         ()
+    | exp LE exp                         ()
+    | exp GT exp                         ()
+    | exp GE exp                         ()
+    | exp AND exp                        ()
+    | exp OR exp                         ()
+    | ID LBRACE recs RBRACE              ()
+    | ID LBRACK exp RBRACK OF exp        ()
+    | lvalue ASSIGN exp                  ()
+    | IF exp THEN exp ELSE exp           ()
+    | IF exp THEN exp                    ()
+    | WHILE exp DO exp                   ()
+    | FOR ID ASSIGN exp TO exp DO exp    ()
+    | BREAK                              ()
+    | LET decs IN exps END               ()
+
+exps :                                   ()
+     | exp expsemi                       ()
+
+expsemi :                                ()
+        | SEMICOLON exp expsemi          ()
+
+params :                                 ()
+       | exp expcom                      ()
+
+expcom :                                 ()
+       | COMMA exp expcom                ()
+
+recs :                                   ()
+     | ID EQ exp reccom                  ()
+
+reccom :                                 ()
+       | COMMA ID EQ exp reccom          ()
