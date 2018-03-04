@@ -1,9 +1,12 @@
-Group
-is
-$/basis.cm
-tiger.lex
-errormsg.sml
-parsetest.sml
-tiger.grm
-$/smlnj-lib.cm
-$/ml-yacc-lib.cm
+Group is
+  absyn.sml
+  errormsg.sml
+  parse.sml
+  table.sig
+  table.sml
+  symbol.sml
+  tiger.lex
+  tiger.grm
+  $/basis.cm
+  $/smlnj-lib.cm
+  $/ml-yacc-lib.cm

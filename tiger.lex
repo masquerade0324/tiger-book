@@ -26,8 +26,9 @@ string    = "\""{char}*"\"";
 
 %%
 
-<INITIAL>{spaces} => (continue ());
-<INITIAL>\n       => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+{spaces} => (continue ());
+\n       => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+
 <INITIAL>"/*"     => (YYBEGIN COMMENT; continue ());
 <INITIAL>"&"      => (Tokens.AND (yypos, yypos+2));
 <INITIAL>array    => (Tokens.ARRAY (yypos, yypos+5));
